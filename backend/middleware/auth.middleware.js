@@ -1,4 +1,19 @@
-// middleware/auth.middleware.js
+/* =============================================================================
+ * Authentication & Authorization Middleware
+ * =============================================================================
+ * Purpose:
+ *   Provide Express middleware to authenticate JWT bearer tokens and enforce
+ *   role-based access control (RBAC).
+ *
+ * Exports:
+ *   - `authenticate(req,res,next)`: validates bearer token, loads user, blocks
+ *     banned accounts, and attaches `req.user`.
+ *   - `authorize(...roles)`: restricts access to allowed roles.
+ *   - `protectChampion(req,res,next)`: allows only `green_champion` role.
+ *
+ * Env Vars:
+ *   - JWT_SECRET (used by `jwt.verify`)
+ * ============================================================================= */
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 

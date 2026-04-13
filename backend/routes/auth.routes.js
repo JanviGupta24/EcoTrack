@@ -1,4 +1,19 @@
-// routes/auth.routes.js
+/* =============================================================================
+ * Auth Routes
+ * =============================================================================
+ * Purpose:
+ *   Provide authentication and account management endpoints:
+ *   - Register, login
+ *   - Google OAuth login
+ *   - OTP send/verify (email/phone)
+ *   - Password reset (OTP-based)
+ *   - Refresh token
+ *   - Logout
+ *
+ * Security:
+ *   - Uses rate limiting to reduce abuse.
+ *   - Uses request validation via `express-validator`.
+ * ============================================================================= */
 const express = require("express");
 const router = express.Router();
 

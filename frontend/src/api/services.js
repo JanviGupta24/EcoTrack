@@ -1,3 +1,23 @@
+/* =============================================================================
+ * API Service Layer
+ * =============================================================================
+ * Purpose:
+ *   Provide typed-by-convention client wrappers around backend endpoints.
+ *   Each service object groups calls by feature:
+ *   - wasteService
+ *   - userService
+ *   - trainingService
+ *   - paymentService
+ *   - aiService
+ *   - notificationService
+ *   - adminService
+ *   - workerService
+ *   - championService
+ *
+ Dependencies:
+ *   - `api` axios instance from `frontend/src/api/axios.js`
+ * ============================================================================= */
+
 import api from "./axios";
 
 /* ================================
@@ -53,6 +73,7 @@ export const trainingService = {
   completeCourse: (id) => api.post(`/training/courses/${id}/complete`),
   getMyCourses: () => api.get("/training/my-courses"),
   getCertificates: () => api.get("/training/certificates"),
+  getCourseProgress: (id) => api.get(`/training/courses/${id}/progress`),
   updateProgress: (id, payload) =>
     api.post(`/training/courses/${id}/progress`, payload),
 };
@@ -62,8 +83,9 @@ export const trainingService = {
 ================================ */
 export const paymentService = {
   createOrder: (data) => api.post("/payments/create-order", data),
-  verifyPayment: (data) => api.post("/payments/verify-payment", data),
-  redeemPoints: (data) => api.post("/payments/redeem-points", data),
+  verifyPayment: (data) => api.post("/payments/verify", data),
+  redeemPoints: (data) => api.post("/payments/redeem", data),
+  requestWithdraw: (data) => api.post("/payments/withdraw", data),
   getTransactions: (params) => api.get("/payments/transactions", { params }),
   getWallet: () => api.get("/payments/wallet"),
 };
@@ -118,6 +140,8 @@ export const adminService = {
       params,
       responseType: "blob",
     }),
+
+  assignReport: (data) => api.post("/admin/assign-report", data),
 };
 
 /* ================================

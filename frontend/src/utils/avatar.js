@@ -1,4 +1,14 @@
-// src/utils/avatar.js
+/* =============================================================================
+ * Avatar Utility
+ * =============================================================================
+ * Purpose:
+ *   Provide a helper to generate fallback avatar URLs for users that don't
+ *   have an uploaded profile picture.
+ *
+ * Key Export:
+ *   - `getAvatarUrl(user)`: returns a ui-avatars.com URL when `user.avatar`
+ *     is not available.
+ ============================================================================= */
 export const getAvatarUrl = (user) => {
   if (!user) {
     return `https://ui-avatars.com/api/?name=User&background=10b981&color=fff&size=256&bold=true`;

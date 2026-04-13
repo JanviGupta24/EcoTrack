@@ -1,4 +1,13 @@
-// src/index.js
+/* =============================================================================
+ * React Entry Point
+ * =============================================================================
+ * Purpose:
+ *   Initialize React DOM root, apply global CSS, and render the main app.
+ *
+ Key Behavior:
+ *   - Imports Tailwind/global styles from `index.css`
+ *   - Uses React 18 `createRoot` for concurrent rendering.
+ * ============================================================================= */
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css'; // Global TailwindCSS styles and animations

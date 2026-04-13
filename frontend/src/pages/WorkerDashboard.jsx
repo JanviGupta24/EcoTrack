@@ -1,3 +1,18 @@
+/* =============================================================================
+ * Worker Dashboard Page
+ * =============================================================================
+ * Purpose:
+ *   Provide workers with:
+ *   - Assigned reports by status (assigned/in-progress/collected)
+ *   - Actions to update report status with timeline + notifications
+ *   - Performance stats and daily schedule view
+ *
+ Data:
+ *   - `workerService.getWorkStats()`
+ *   - `workerService.getAssignedReports({status})`
+ *   - `workerService.updateReportStatus()`
+ * ============================================================================= */
+
 import React, { useState, useEffect } from 'react';
 import {
   Truck, CheckCircle, Clock, MapPin, Phone, User,
@@ -6,6 +21,7 @@ import {
 import { workerService } from '../api/services';
 import AppLoader from '../components/Loader';
 import { useAuth } from '../context/AuthContext';
+import { getApiErrorMessage } from "../utils/errors";
 
 // Animation wrapper
 const AnimatedBlock = ({ children, delay = 0, className = "" }) => (
@@ -48,7 +64,7 @@ const WorkerDashboard = () => {
       setStats(statsRes.data?.stats || {});
     } catch (err) {
       console.error("Failed to fetch worker stats:", err);
-      setError(err?.response?.data?.message || 'Failed to load stats');
+      setError(getApiErrorMessage(err, "Failed to load stats. Please try again."));
     } finally {
       if (isInitialLoad) setLoading(false);
     }
@@ -62,7 +78,7 @@ const WorkerDashboard = () => {
       setReports(reportsRes.data?.reports || []);
     } catch (err) {
       console.error("Failed to fetch reports:", err);
-      setError(err?.response?.data?.message || 'Failed to load reports');
+      setError(getApiErrorMessage(err, "Failed to load reports. Please try again."));
     } finally {
       setTabLoading(false);
     }
@@ -84,7 +100,7 @@ const WorkerDashboard = () => {
       await Promise.all([fetchData(), fetchReports()]);
     } catch (err) {
       console.error("Failed to update report status:", err);
-      setError(err?.response?.data?.message || 'Failed to update status');
+      setError(getApiErrorMessage(err, "Failed to update status. Please try again."));
     } finally {
       setActionLoading(null);
     }
@@ -144,7 +160,7 @@ const WorkerDashboard = () => {
             <StatCard
               icon={Star}
               title="Your Average Rating"
-              value={stats?.avgRating?.toFixed?.(1) ?? 0}
+              value={stats?.avgRating != null ? String(stats.avgRating) : '0.0'}
               color="from-orange-500 to-red-600"
             />
           </AnimatedBlock>
@@ -157,7 +173,7 @@ const WorkerDashboard = () => {
               {[
                 { key: 'assigned', label: 'Assigned', count: stats?.pending },
                 { key: 'in-progress', label: 'In Progress', count: stats?.inProgress },
-                { key: 'collected', label: 'Collected', count: stats?.collected },
+                { key: 'collected', label: 'Collected', count: stats?.totalCompleted },
               ].map(({ key, label, count }) => (
                 <button
                   key={key}

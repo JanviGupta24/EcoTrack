@@ -1,4 +1,21 @@
-// utils/notification.js
+/* =============================================================================
+ * Notification Helpers
+ * =============================================================================
+ * Purpose:
+ *   Provide convenience functions to create and deliver notifications across
+ *   supported channels (in-app, email, SMS).
+ *
+ * Key Exports:
+ *   - createNotification(userId, payload)
+ *
+ * Dependencies:
+ *   - `backend/models/Notification`
+ *   - `backend/utils/email` and `backend/utils/sms`
+ *
+ * Env Vars:
+ *   - Twilio credentials (for SMS)
+ *   - EMAIL_* (for email)
+ * ============================================================================= */
 const Notification = require("../models/Notification");
 const User = require("../models/User");
 const { sendEmail } = require("./email");

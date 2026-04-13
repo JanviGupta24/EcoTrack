@@ -1,4 +1,20 @@
-// middleware/validation.middleware.js
+/* =============================================================================
+ * Request Validation Middleware (express-validator)
+ * =============================================================================
+ * Purpose:
+ *   Define reusable `express-validator` schemas for common request bodies and
+ *   provide a single `validate` middleware that returns consistent 400 errors.
+ *
+ * Exports:
+ *   - `validate(req,res,next)`: validates accumulated express-validator checks
+ *   - `registerValidation`: request validation for user registration
+ *   - `loginValidation`: request validation for user login
+ *   - `otpValidation`: request validation for OTP operations
+ *   - `resetPasswordValidation`: request validation for password reset
+ *
+ * Notes:
+ *   - Validation rules are intentionally strict to keep controller logic clean.
+ * ============================================================================= */
 const { body, validationResult } = require("express-validator");
 
 /* ------------------------------------------------------------------

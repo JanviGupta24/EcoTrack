@@ -1,4 +1,15 @@
-// models/Resource.js
+/* =============================================================================
+ * Resource Model
+ * =============================================================================
+ * Purpose:
+ *   Store community/government learning resources (documents, videos,
+ *   articles, etc.) with categorization and optional public visibility.
+ *
+ * Key Features:
+ *   - Supports `category`, `type`, `tags` for filtering
+ *   - Geo/text search via indexes (`title` + `description` text index)
+ *   - `isPublic` toggles whether resources appear publicly
+ * ============================================================================= */
 // ------------------------------------------------------------
 // CLEAN VERSION — removed duplicate category index
 // Fully documented for clarity
@@ -98,7 +109,8 @@ const resourceSchema = new mongoose.Schema(
 /* ---------------------------------------------------------
     TEXT + CATEGORY INDEXES
 --------------------------------------------------------- */
-resourceSchema.index({ title: "text", description: "text", tags: 1 });
+/* Text index: tags are an array — do not mix into text index (MongoDB 201 error). */
+resourceSchema.index({ title: "text", description: "text" });
 resourceSchema.index({ category: 1, createdAt: -1 });
 
 module.exports = mongoose.model("Resource", resourceSchema);

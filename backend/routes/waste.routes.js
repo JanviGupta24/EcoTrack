@@ -1,4 +1,15 @@
-// routes/waste.routes.js
+/* =============================================================================
+ * Waste Routes
+ * =============================================================================
+ * Purpose:
+ *   Expose authenticated endpoints for the waste-report lifecycle:
+ *   - Create waste report (with image upload + validation)
+ *   - List/get reports
+ *   - Update status/verification and delete reports (role restricted)
+ *   - Find nearby facilities and submit ratings/feedback
+ *
+ * Mounted under `/api/waste`.
+ * ============================================================================= */
 const express = require("express");
 const router = express.Router();
 

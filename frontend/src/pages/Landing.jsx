@@ -1,4 +1,15 @@
-// src/pages/Landing.jsx
+/* =============================================================================
+ * Landing Page
+ * =============================================================================
+ * Purpose:
+ *   Provide the public landing experience for EcoTrack:
+ *   - marketing/feature sections
+ *   - calls-to-action for login/register
+ *   - optional content driven by UI-only sections
+ *
+ Notes:
+ *   No authenticated API calls should be required for this page.
+ * ============================================================================= */
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {

@@ -1,4 +1,15 @@
-// routes/notification.routes.js
+/* =============================================================================
+ * Notification Routes
+ * =============================================================================
+ * Purpose:
+ *   Route authenticated notification operations to `notification.controller`:
+ *   - List notifications (GET `/api/notifications`)
+ *   - Mark as read (single/all/multiple)
+ *   - Archive and permanently delete notifications
+ *
+ * Security:
+ *   All endpoints require JWT authentication via `authenticate` middleware.
+ * ============================================================================= */
 const express = require('express');
 const router = express.Router();
 const notificationController = require('../controllers/notification.controller');

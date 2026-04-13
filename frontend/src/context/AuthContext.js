@@ -1,9 +1,41 @@
-// src/context/AuthContext.js
+/* =============================================================================
+ * Auth Context (React)
+ * =============================================================================
+ * Purpose:
+ *   Manage authentication state for the frontend:
+ *   - Store `accessToken` and `refreshToken` in localStorage
+ *   - Provide helper actions: `login`, `register`, `logout`, `googleLogin`
+ *   - Expose authenticated `user` and `loading` state via `useAuth()`
+ *
+ Key Interactions:
+ *   - Uses `api` axios instance to call `/api/auth/*` endpoints
+ *   - Refresh flow is handled by `frontend/src/api/axios.js` interceptor
+ * ============================================================================= */
 import React, { createContext, useContext, useState, useEffect } from "react";
 import api from "../api/axios";
 import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext(null);
+
+const extractApiErrorMessage = (err, fallback) => {
+  const data = err?.response?.data;
+
+  if (data?.message && typeof data.message === "string") {
+    return data.message;
+  }
+
+  if (Array.isArray(data?.errors) && data.errors.length > 0) {
+    const firstError = data.errors[0];
+    if (typeof firstError === "string") return firstError;
+    if (firstError?.msg) return firstError.msg;
+  }
+
+  if (!err?.response) {
+    return "Cannot reach server. Check backend is running and API URL is correct.";
+  }
+
+  return fallback;
+};
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
@@ -80,7 +112,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       return {
         success: false,
-        message: err.response?.data?.message || "Login failed",
+        message: extractApiErrorMessage(err, "Login failed"),
       };
     }
   };
@@ -99,7 +131,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       return {
         success: false,
-        message: err.response?.data?.message || "Registration failed",
+        message: extractApiErrorMessage(err, "Registration failed"),
       };
     }
   };
@@ -118,7 +150,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       return {
         success: false,
-        message: err.response?.data?.message || "Google login failed",
+        message: extractApiErrorMessage(err, "Google login failed"),
       };
     }
   };

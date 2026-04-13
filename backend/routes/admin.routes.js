@@ -1,4 +1,17 @@
-// routes/admin.routes.js
+/* =============================================================================
+ * Admin Routes
+ * =============================================================================
+ * Purpose:
+ *   Expose super-admin endpoints for statistics, user/worker management,
+ *   facility management, analytics, and data export.
+ *
+ * Security:
+ *   All routes require authentication and role authorization:
+ *   - `authorize('admin','super_admin')`
+ *   enforced via middleware.
+ *
+ * Mounted under `/api/admin`.
+ * ============================================================================= */
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/admin.controller');

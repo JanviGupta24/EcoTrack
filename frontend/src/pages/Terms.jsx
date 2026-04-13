@@ -1,4 +1,12 @@
-// src/pages/Terms.jsx
+/* =============================================================================
+ * Terms Page
+ * =============================================================================
+ * Purpose:
+ *   Display EcoTrack application Terms of Service content.
+ *
+ Notes:
+ *   UI-only content; no API calls from this page.
+ * ============================================================================= */
 import React, { useState, useEffect, useRef } from 'react';
 
 // We assume the keyframes 'animate-slideInUp' and 'fadeIn' are defined globally

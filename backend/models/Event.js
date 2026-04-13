@@ -1,4 +1,18 @@
-// models/Event.js
+/* =============================================================================
+ * Event Model
+ * =============================================================================
+ * Purpose:
+ *   Represent events created/organized for EcoTrack community engagement.
+ *   Used by the Green Champion role to display event lists.
+ *
+ * Key Features:
+ *   - Schema fields for title/description/date/participants/tags
+ *   - `createdAt`/`updatedAt` timestamps
+ *
+ * Env Vars:
+ *   None.
+ * ============================================================================= */
+
 const mongoose = require("mongoose");
 
 const eventSchema = new mongoose.Schema(
@@ -86,8 +100,8 @@ const eventSchema = new mongoose.Schema(
 /* ---------------------------------------------------------
     PRE-SAVE HOOK — AUTO-UPDATE STATUS
 --------------------------------------------------------- */
-eventSchema.pre("save", function (next) {
-  if (!this.date) return next();
+eventSchema.pre("save", function () {
+  if (!this.date) return;
 
   const now = new Date();
 
@@ -97,8 +111,6 @@ eventSchema.pre("save", function (next) {
       this.status = "ongoing";
     else this.status = "completed";
   }
-
-  next();
 });
 
 /* ---------------------------------------------------------

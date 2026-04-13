@@ -1,4 +1,12 @@
-// src/pages/Contact.jsx
+/* =============================================================================
+ * Contact Page
+ * =============================================================================
+ * Purpose:
+ *   Provide a user contact/support form and display contact information.
+ *
+ * Notes:
+ *   - UI-only in this codebase; submission uses a simple handler.
+ * ============================================================================= */
 import React, { useState, useEffect, useRef } from "react";
 import {
   Mail,

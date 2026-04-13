@@ -1,13 +1,38 @@
-// controllers/payment.controller.js
+/* =============================================================================
+ * Payments Controller (Razorpay + Wallet)
+ * =============================================================================
+ * Purpose:
+ *   Handle wallet top-up payments via Razorpay and wallet eco-points redemption.
+ *
+ * Key Endpoints (mounted under `/api/payments`):
+ *   - createOrder(req,res): POST `/create-order`
+ *   - verifyPayment(req,res): POST `/verify`
+ *   - redeemPoints(req,res): POST `/redeem`
+ *   - getTransactions(req,res): GET `/transactions`
+ *   - getWallet(req,res): GET `/wallet`
+ *
+ * Safety:
+ *   - Razorpay client is created lazily; if keys are missing the API returns 503
+ *     instead of crashing the server.
+ *
+ * Env Vars:
+ *   - RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET
+ * ============================================================================= */
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+let razorpayInstance = null;
+function getRazorpay() {
+  const keyId = process.env.RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  if (!keyId || !keySecret) return null;
+  if (!razorpayInstance) {
+    razorpayInstance = new Razorpay({ key_id: keyId, key_secret: keySecret });
+  }
+  return razorpayInstance;
+}
 
 /**
  * @desc Create a Razorpay order for wallet top-up
@@ -16,6 +41,14 @@ const razorpay = new Razorpay({
  */
 exports.createOrder = async (req, res) => {
   try {
+    const razorpay = getRazorpay();
+    if (!razorpay) {
+      return res.status(503).json({
+        success: false,
+        message: 'Payment gateway is not configured (missing Razorpay keys)',
+      });
+    }
+
     const { amount, currency = 'INR' } = req.body;
 
     if (!amount || amount <= 0) {
@@ -54,6 +87,14 @@ exports.createOrder = async (req, res) => {
  */
 exports.verifyPayment = async (req, res) => {
   try {
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (!keySecret) {
+      return res.status(503).json({
+        success: false,
+        message: 'Payment gateway is not configured',
+      });
+    }
+
     const { orderId, paymentId, signature } = req.body;
 
     if (!orderId || !paymentId || !signature) {
@@ -61,7 +102,7 @@ exports.verifyPayment = async (req, res) => {
     }
 
     const generatedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .createHmac('sha256', keySecret)
       .update(`${orderId}|${paymentId}`)
       .digest('hex');
 
@@ -193,5 +234,104 @@ exports.getWallet = async (req, res) => {
   } catch (error) {
     console.error('getWallet Error:', error);
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * @desc Create a withdraw request (manual payout)
+ * @route POST /api/payments/withdraw
+ * @access Private
+ *
+ * Notes:
+ * - This creates a withdrawal transaction and immediately deducts the amount from wallet balance.
+ * - Actual payout processing is out of scope; admins/operators can later complete/refund externally.
+ */
+exports.requestWithdraw = async (req, res) => {
+  try {
+    const { amount, method, bankDetails, upiId, note } = req.body || {};
+
+    const numericAmount = Number(amount);
+    if (!numericAmount || Number.isNaN(numericAmount) || numericAmount <= 0) {
+      return res.status(400).json({ success: false, message: "Invalid amount" });
+    }
+
+    // Basic method validation
+    const payoutMethod = String(method || "").trim().toLowerCase();
+    const allowedMethods = new Set(["bank", "upi"]);
+    if (!allowedMethods.has(payoutMethod)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid withdrawal method. Use 'bank' or 'upi'.",
+      });
+    }
+
+    if (payoutMethod === "upi") {
+      const normalizedUpi = String(upiId || "").trim();
+      if (!normalizedUpi) {
+        return res.status(400).json({
+          success: false,
+          message: "UPI ID is required for UPI withdrawals.",
+        });
+      }
+    }
+
+    if (payoutMethod === "bank") {
+      const bd = bankDetails || {};
+      const accountName = String(bd.accountName || "").trim();
+      const accountNumber = String(bd.accountNumber || "").trim();
+      const ifsc = String(bd.ifsc || "").trim().toUpperCase();
+
+      if (!accountName || !accountNumber || !ifsc) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Bank details are incomplete. Please provide account name, account number, and IFSC.",
+        });
+      }
+    }
+
+    const user = await User.findById(req.user._id).select("walletBalance");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (user.walletBalance < numericAmount) {
+      return res.status(400).json({
+        success: false,
+        message: "Insufficient wallet balance",
+      });
+    }
+
+    // Deduct balance immediately to prevent double-withdrawal
+    user.walletBalance = +(user.walletBalance - numericAmount).toFixed(2);
+    await user.save();
+
+    const tx = await Transaction.create({
+      userId: req.user._id,
+      type: "wallet-withdrawal",
+      amount: numericAmount,
+      ecoPoints: 0,
+      category: "payment",
+      paymentMethod: "wallet",
+      status: "pending",
+      description: `Withdrawal request (INR ${numericAmount})`,
+      metadata: {
+        method: payoutMethod,
+        bankDetails: payoutMethod === "bank" ? bankDetails : undefined,
+        upiId: payoutMethod === "upi" ? upiId : undefined,
+        note: note ? String(note).slice(0, 500) : undefined,
+      },
+    });
+
+    return res.status(201).json({
+      success: true,
+      message:
+        "Withdrawal request submitted successfully. It will be processed shortly.",
+      walletBalance: user.walletBalance,
+      transaction: tx,
+    });
+  } catch (error) {
+    console.error("requestWithdraw Error:", error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };

@@ -1,4 +1,16 @@
-// models/OTP.js
+/* =============================================================================
+ * OTP Model (Email/Phone)
+ * =============================================================================
+ * Purpose:
+ *   Store one-time passwords for verification and password reset flows.
+ *
+ * Security:
+ *   - OTP values are hashed in `pre('save')` and never selected in queries
+ *     (schema uses `select: false`).
+ *   - Supports both email-based and phone-based OTPs via `email` and `phone`
+ *     fields.
+ *
+ * ============================================================================= */
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
@@ -60,20 +72,18 @@ const otpSchema = new mongoose.Schema(
 );
 
 /* REQUIRE AT LEAST ONE OF email OR phone */
-otpSchema.pre("validate", function (next) {
+otpSchema.pre("validate", function () {
   if (!this.email && !this.phone) {
-    return next(new Error("Either email or phone is required"));
+    throw new Error("Either email or phone is required");
   }
 
   // Ensure type matches data presence
   if (this.type === "email" && !this.email) {
-    return next(new Error("OTP type 'email' requires an email field"));
+    throw new Error("OTP type 'email' requires an email field");
   }
   if (this.type === "phone" && !this.phone) {
-    return next(new Error("OTP type 'phone' requires a phone field"));
+    throw new Error("OTP type 'phone' requires a phone field");
   }
-
-  next();
 });
 
 /* TTL — Auto Delete After Expiry */
@@ -98,16 +108,15 @@ otpSchema.index(
 );
 
 /* HASH OTP BEFORE SAVE */
-otpSchema.pre("save", async function (next) {
+otpSchema.pre("save", async function () {
   // Normalize inputs
   if (this.email) this.email = this.email.trim().toLowerCase();
   if (this.phone) this.phone = this.phone.trim();
 
-  if (!this.isModified("otp")) return next();
+  if (!this.isModified("otp")) return;
 
   // hash OTP securely
   this.otp = await bcrypt.hash(this.otp, 10);
-  next();
 });
 
 /* COMPARE OTP */

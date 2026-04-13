@@ -1,4 +1,20 @@
-// models/WasteReport.js
+/* =============================================================================
+ * WasteReport Model
+ * =============================================================================
+ * Purpose:
+ *   Represent waste submissions from authenticated users and maintain its
+ *   lifecycle state:
+ *   pending -> assigned -> in-progress -> collected -> processed -> completed
+ *
+ * Key Features:
+ *   - GeoJSON location with `2dsphere` index for nearby queries
+ *   - Role-aware worker assignment fields (`assignedTo`, timestamps)
+ *   - AI prediction payload (`aiPrediction`) for waste-type insights
+ *   - Timeline entries maintained via schema pre-save hook
+ *
+ * Env Vars:
+ *   None.
+ * ============================================================================= */
 const mongoose = require("mongoose");
 
 /* TIMELINE SUB-SCHEMA */
@@ -129,7 +145,7 @@ wasteReportSchema.index({ status: 1, createdAt: -1 });
 wasteReportSchema.index({ wasteType: 1, priority: 1 });
 
 /* ⭐ PRE-SAVE HOOK TO AUTO-CONVERT quantity → quantityKg */
-wasteReportSchema.pre("save", function (next) {
+wasteReportSchema.pre("save", function () {
   const now = new Date();
 
   // Convert quantity size → KG
@@ -171,7 +187,6 @@ wasteReportSchema.pre("save", function (next) {
     });
   }
 
-  next();
 });
 
 /* STATIC METHODS */

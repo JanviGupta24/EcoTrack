@@ -1,3 +1,18 @@
+/* =============================================================================
+ * Navbar Component
+ * =============================================================================
+ * Purpose:
+ *   Render the top navigation bar with:
+ *   - Role-aware navigation links
+ *   - Notification dropdown (in-app)
+ *   - Mobile navigation menu
+ *   - User profile/logout controls
+ *
+ Key Dependencies:
+ *   - `frontend/src/context/AuthContext` for auth state and actions
+ *   - `frontend/src/api/services` for notification fetching
+ * ============================================================================= */
+
 import React, { useState, useEffect } from "react";
 import {
   Leaf,

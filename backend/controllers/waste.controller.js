@@ -1,4 +1,18 @@
-// controllers/waste.controller.js
+/* =============================================================================
+ * Waste Controller
+ * =============================================================================
+ * Purpose:
+ *   Implement the waste lifecycle for reports:
+ *   - Create waste reports (with image upload + optional AI prediction)
+ *   - List reports with role-based filtering
+ *   - Get report details
+ *   - Update report status/verification/rating
+ *   - Delete (role constrained)
+ *   - Find nearby facilities based on coordinates
+ *   - Rate collection feedback after processing
+ *
+ * Mounted under `/api/waste` (routes in `routes/waste.routes.js`).
+ * ============================================================================= */
 const WasteReport = require("../models/WasteReport");
 const Facility = require("../models/Facility");
 const User = require("../models/User");
@@ -358,12 +372,20 @@ exports.deleteReport = async (req, res) => {
 /* -------------------------------------------------------------------------- */
 exports.getNearbyFacilities = async (req, res) => {
   try {
-    const { longitude, latitude, maxDistance = 5000 } = req.query;
+    const { maxDistance = 5000 } = req.query;
+    const longitude = req.query.longitude ?? req.query.lng;
+    const latitude = req.query.latitude ?? req.query.lat;
 
-    if (!longitude || !latitude) {
+    if (
+      longitude === undefined ||
+      latitude === undefined ||
+      longitude === "" ||
+      latitude === ""
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Coordinates required",
+        message:
+          "Coordinates required (longitude & latitude, or lng & lat as query params)",
       });
     }
 

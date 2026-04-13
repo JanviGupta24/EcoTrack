@@ -1,3 +1,18 @@
+/* =============================================================================
+ * Waste Report Page
+ * =============================================================================
+ * Purpose:
+ *   Provide a multi-step workflow for users to submit a waste report:
+ *   1) Select waste type and quantity
+ *   2) Upload waste images (up to configured limit)
+ *   3) Capture/confirm geolocation
+ *   4) Submit to backend and display earned eco-points
+ *
+ Dependencies:
+ *   - `wasteService.createReport()` for POST `/api/waste/report`
+ *   - Browser geolocation APIs for location capture
+ * ============================================================================= */
+
 import React, { useState } from "react";
 import {
   Camera,
@@ -15,6 +30,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { wasteService } from "../api/services";
+import { getApiErrorMessage } from "../utils/errors";
 
 // Animation wrapper
 const AnimatedBlock = ({ children, delay = 0, className = "" }) => (
@@ -281,7 +297,7 @@ const WasteReportPage = () => {
       setEarnedPoints(response.data?.ecoPointsAwarded || 0);
       setSuccess(true);
     } catch (err) {
-      setError(err?.response?.data?.message || "Report submission failed.");
+      setError(getApiErrorMessage(err, "Report submission failed. Please try again."));
     } finally {
       setUploading(false);
     }

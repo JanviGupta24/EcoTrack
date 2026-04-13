@@ -1,4 +1,13 @@
-// controllers/user.controller.js
+/* =============================================================================
+ * User Controller
+ * =============================================================================
+ * Purpose:
+ *   Provide authenticated user features:
+ *   - Read/update profile and avatar
+ *   - Fetch personalized stats and global leaderboard
+ *
+ * Mounted under `/api/users` with endpoints in `routes/user.routes.js`.
+ * ============================================================================= */
 const User = require("../models/User");
 const WasteReport = require("../models/WasteReport");
 const Transaction = require("../models/Transaction");

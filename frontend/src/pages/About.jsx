@@ -1,4 +1,10 @@
-// src/pages/About.jsx
+/* =============================================================================
+ * About Page
+ * =============================================================================
+ * Purpose:
+ *   Describe the EcoTrack project, goals, and how it helps improve waste
+ *   management through collaboration and education.
+ ============================================================================= */
 import React from "react";
 import { Users, Target, Eye, Leaf } from "lucide-react";
 

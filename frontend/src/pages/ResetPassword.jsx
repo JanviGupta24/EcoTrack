@@ -1,4 +1,15 @@
-// src/pages/ResetPassword.jsx
+/* =============================================================================
+ * Reset Password Page
+ * =============================================================================
+ * Purpose:
+ *   Complete password reset by submitting the new password along with
+ *   the previously-verified OTP/token (via email + OTP context).
+ *
+ * Behavior:
+ *   - Collects email and new password
+ *   - Calls the backend reset endpoint through `AuthContext`
+ *   - Redirects to login screen on success
+ * ============================================================================= */
 import React, { useState } from "react";
 import {
   Lock,
@@ -8,9 +19,10 @@ import {
   CheckCircle,
   AlertCircle,
 } from "lucide-react";
-import axios from "axios";
+import api from "../api/axios";
 import AuthLayout from "../components/AuthLayout";
 import { useNavigate, useLocation } from "react-router-dom";
+import { getApiErrorMessage } from "../utils/errors";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -49,7 +61,7 @@ const ResetPassword = () => {
     try {
       setLoading(true);
 
-      await axios.post("/api/auth/reset-password", {
+      await api.post("/auth/reset-password", {
         email,
         newPassword: password,
       });
@@ -60,7 +72,7 @@ const ResetPassword = () => {
         navigate("/login");
       }, 1200);
     } catch (err) {
-      setError(err.response?.data?.message || "Reset failed. Try again.");
+      setError(getApiErrorMessage(err, "Reset failed. Please try again."));
     } finally {
       setLoading(false);
     }

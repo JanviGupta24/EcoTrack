@@ -1,3 +1,15 @@
+/* =============================================================================
+ * Training Page
+ * =============================================================================
+ * Purpose:
+ *   Display eco-education training modules/courses to authenticated users.
+ *
+ * Key Behaviors:
+ *   - Fetches course list via `trainingService.getCourses()`
+ *   - Supports course filtering/search through UI controls
+ *   - Navigates to course detail pages for enrollment and progress
+ ============================================================================= */
+
 import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, Award, Clock, Play, CheckCircle, 
@@ -7,6 +19,7 @@ import { trainingService } from '../api/services';
 import { useAuth } from '../context/AuthContext';
 import AppLoader from '../components/Loader';
 import { useNavigate } from 'react-router-dom';
+import { getApiErrorMessage } from "../utils/errors";
 
 // --- Animation Wrapper ---
 const AnimatedBlock = ({ children, delay = 0, className = "" }) => (
@@ -51,7 +64,7 @@ const Training = () => {
       setCertificates(certsRes?.data?.certificates || []);
     } catch (err) {
       console.error("Failed to fetch training data:", err);
-      setError(err.response?.data?.message || "Failed to load training data");
+      setError(getApiErrorMessage(err, "Failed to load training data. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -69,7 +82,7 @@ const Training = () => {
       setMessage({ type: "success", content: "Enrolled successfully! You can find it in 'My Courses'." });
       fetchData();
     } catch (err) {
-      setMessage({ type: "error", content: err.response?.data?.message || "Failed to enroll" });
+      setMessage({ type: "error", content: getApiErrorMessage(err, "Failed to enroll. Please try again.") });
     } finally {
       setEnrollLoading(null);
     }
@@ -211,7 +224,10 @@ const Training = () => {
                 {/* Thumbnail */}
                 <div className="relative">
                   <img
-                    src={`https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=400&h=250&fit=crop&q=80&${course._id}`}
+                    src={
+                      course.thumbnail ||
+                      "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=400&h=250&fit=crop&q=80"
+                    }
                     alt={course.title}
                     className="w-full h-48 object-cover"
                   />
@@ -249,7 +265,7 @@ const Training = () => {
                     </div>
                     <div className="flex items-center">
                       <BookOpen className="w-4 h-4 mr-1" />
-                      {(course.modules?.length || 0)} modules
+                      {(course.moduleCount ?? course.modules?.length ?? 0)} modules
                     </div>
                   </div>
 

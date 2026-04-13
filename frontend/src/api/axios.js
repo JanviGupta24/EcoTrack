@@ -1,4 +1,18 @@
-// src/api/axios.js
+/* =============================================================================
+ * Axios Client (JWT + Refresh Handling)
+ * =============================================================================
+ * Purpose:
+ *   Centralize HTTP requests to the backend API with:
+ *   - Base URL configuration from `REACT_APP_API_URL`
+ *   - JWT `Authorization` header injection from local storage
+ *   - Automatic refresh token flow on `401 Unauthorized`
+ *
+ Key Exports:
+ *   - default export `api` (configured axios instance)
+ *
+ Security:
+ *   - Avoid infinite retry loops via `_retry` guard.
+ * ============================================================================= */
 import axios from "axios";
 
 /* -------------------------------------------------------------------------- */
@@ -49,11 +63,27 @@ api.interceptors.response.use(
 
     const status = error.response.status;
 
-    // ⛔ Do NOT try to refresh if the failing route is /auth/logout
+    // ⛔ Do NOT try to refresh for auth flows where a 401 is expected
+    //    (wrong password / registration / forgot-password / etc.)
     //    and prevent infinite retry loops using _retry flag
     if (
       status === 401 &&
-      originalRequest?.url !== "/auth/logout" &&
+      !(
+        typeof originalRequest?.url === "string" &&
+        [
+          "/auth/logout",
+          "/auth/login",
+          "/auth/register",
+          "/auth/google-login",
+          "/auth/refresh",
+          "/auth/me",
+          "/auth/forgot-password",
+          "/auth/verify-reset-otp",
+          "/auth/reset-password",
+          "/auth/send-otp",
+          "/auth/verify-otp",
+        ].some((p) => originalRequest.url.includes(p))
+      ) &&
       !originalRequest._retry
     ) {
       originalRequest._retry = true;

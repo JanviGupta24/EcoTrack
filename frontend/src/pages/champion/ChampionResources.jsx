@@ -1,8 +1,20 @@
+/* =============================================================================
+ * Champion Resources Page
+ * =============================================================================
+ * Purpose:
+ *   Provide public learning/resources browsing for `green_champion` users
+ *   (sourced via `championService.getResources()`).
+ *
+ * Notes:
+ *   Resources UI is driven by backend response data.
+ * ============================================================================= */
+
 import React, { useEffect, useState } from "react";
 import { BookOpen, Link, AlertCircle } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { championService } from "../../api/services"; // ✅ Correct Service
 import Loader from "../../components/Loader";
+import { getApiErrorMessage } from "../../utils/errors";
 
 // 🌿 Animation Wrapper
 const AnimatedBlock = ({ children, delay = 0 }) => (
@@ -28,7 +40,7 @@ const ChampionResources = () => {
         setResources(res.data.resources || []);
       } catch (err) {
         console.error("Error fetching Green Champion resources:", err);
-        setError("Failed to load sustainability resources. Please try again later.");
+        setError(getApiErrorMessage(err, "Failed to load sustainability resources. Please try again."));
       } finally {
         setLoading(false);
       }

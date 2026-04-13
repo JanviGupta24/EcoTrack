@@ -1,22 +1,63 @@
-// controllers/ai.controller.js
+/* =============================================================================
+ * AI Controller (Gemini)
+ * =============================================================================
+ * Purpose:
+ *   Provide AI-backed endpoints for:
+ *   - EcoBot chatbot responses (text generation)
+ *   - Waste image classification (vision model)
+ *   - Admin insights generation (text analytics summary)
+ *   - Quiz generation (structured JSON output)
+ *
+ * Behavior:
+ *   - Uses `GEMINI_API_KEY` to initialize the Gemini SDK lazily.
+ *   - If the API key is missing, endpoints return HTTP 503 with a clear message
+ *     (no server crash).
+ *
+ * Exports:
+ *   - chatbot(req,res)
+ *   - classifyWaste(req,res)
+ *   - generateInsights(req,res)
+ *   - generateQuiz(req,res)
+ *
+ * Env Vars:
+ *   - GEMINI_API_KEY
+ * ============================================================================= */
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Correct models for your installed SDK
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+function getGenAI() {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) return null;
+  return new GoogleGenerativeAI(key);
+}
 
-const textModel = genAI.getGenerativeModel({
-  model: "gemini-1.0-pro", // ✅ Works on all old SDKs
-});
+function getTextModel() {
+  const g = getGenAI();
+  if (!g) return null;
+  return g.getGenerativeModel({ model: "gemini-1.0-pro" });
+}
 
-const visionModel = genAI.getGenerativeModel({
-  model: "gemini-1.0-pro-vision", // ✅ Vision model supported
-});
+function getVisionModel() {
+  const g = getGenAI();
+  if (!g) return null;
+  return g.getGenerativeModel({ model: "gemini-1.0-pro-vision" });
+}
+
+function aiNotConfigured(res) {
+  return res.status(503).json({
+    success: false,
+    message:
+      "AI service is not configured. Add GEMINI_API_KEY to the backend .env file.",
+  });
+}
 
 /* -------------------------------------------------------------------------- */
 /*                           🤖 AI CHATBOT (EcoBot)                           */
 /* -------------------------------------------------------------------------- */
 exports.chatbot = async (req, res) => {
   try {
+    const textModel = getTextModel();
+    if (!textModel) return aiNotConfigured(res);
+
     const { message, conversationHistory = [] } = req.body;
 
     if (!message) {
@@ -66,6 +107,9 @@ exports.chatbot = async (req, res) => {
 /* -------------------------------------------------------------------------- */
 exports.classifyWaste = async (req, res) => {
   try {
+    const visionModel = getVisionModel();
+    if (!visionModel) return aiNotConfigured(res);
+
     const { imageUrl } = req.body;
 
     if (!imageUrl) {
@@ -113,9 +157,12 @@ exports.classifyWaste = async (req, res) => {
 /* -------------------------------------------------------------------------- */
 exports.generateInsights = async (req, res) => {
   try {
+    const textModel = getTextModel();
+    if (!textModel) return aiNotConfigured(res);
+
     const { data, analysisType } = req.body;
 
-    if (!data || !analysisType) {
+    if (data === undefined || data === null || !analysisType) {
       return res.status(400).json({
         success: false,
         message: "Data and analysisType are required",
@@ -152,6 +199,9 @@ exports.generateInsights = async (req, res) => {
 /* -------------------------------------------------------------------------- */
 exports.generateQuiz = async (req, res) => {
   try {
+    const textModel = getTextModel();
+    if (!textModel) return aiNotConfigured(res);
+
     const { topic, difficulty = "medium", questionCount = 5 } = req.body;
 
     if (!topic) {

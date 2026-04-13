@@ -1,8 +1,19 @@
+/* =============================================================================
+ * Champion Reports Page
+ * =============================================================================
+ * Purpose:
+ *   Show community/reporting insights for `green_champion` users.
+ *
+ * Data:
+ *   Fetches data using `championService.getReports()`.
+ * ============================================================================= */
+
 import React, { useEffect, useState } from "react";
 import { MapPin, Filter, AlertCircle } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { championService } from "../../api/services"; // ✅ use championService
 import Loader from "../../components/Loader";
+import { getApiErrorMessage } from "../../utils/errors";
 
 // 🌿 Animation Wrapper
 const AnimatedBlock = ({ children, delay = 0 }) => (
@@ -29,7 +40,7 @@ const ChampionReports = () => {
         setReports(res.data.reports || []);
       } catch (err) {
         console.error("Error fetching reports:", err);
-        setError("Failed to load community reports. Please try again later.");
+        setError(getApiErrorMessage(err, "Failed to load community reports. Please try again."));
       } finally {
         setLoading(false);
       }

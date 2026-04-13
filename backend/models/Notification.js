@@ -1,4 +1,17 @@
-// models/Notification.js
+/* =============================================================================
+ * Notification Model
+ * =============================================================================
+ * Purpose:
+ *   Persist in-app notifications for users. Supports:
+ *   - read/unread state with `readAt`
+ *   - soft-archive via `archived`
+ *   - metadata payloads for contextual UI
+ *
+ Key Behaviors:
+ *   - Indexed for efficient timeline queries
+ *   - Pre-save hook sets `readAt` when `isRead` becomes true
+ *   - Static helper: `markAllAsRead(userId)`
+ ============================================================================= */
 // ------------------------------------------------------------
 // CLEAN VERSION — All duplicate indexes removed
 // Added full explanations for every field and operation
@@ -141,11 +154,17 @@ notificationSchema.index({ archived: 1 });
 /* ---------------------------------------------------------
     MIDDLEWARE — Auto update readAt when isRead becomes true
 --------------------------------------------------------- */
-notificationSchema.pre("save", function (next) {
+notificationSchema.pre("save", function () {
   if (this.isModified("isRead") && this.isRead && !this.readAt) {
     this.readAt = new Date();
   }
-  next();
 });
+
+notificationSchema.statics.markAllAsRead = async function (userId) {
+  return this.updateMany(
+    { userId, archived: false },
+    { $set: { isRead: true, readAt: new Date() } }
+  );
+};
 
 module.exports = mongoose.model("Notification", notificationSchema);

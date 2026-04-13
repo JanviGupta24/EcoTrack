@@ -1,3 +1,16 @@
+/* =============================================================================
+ * Register Page
+ * =============================================================================
+ * Purpose:
+ *   Provide user registration with optional role selection and OTP verification
+ *   flow (email and/or phone).
+ *
+ * Behavior:
+ *   - Collects name/email/password/phone
+ *   - Calls `AuthContext.register()` for account creation
+ *   - Supports OTP verification via auth endpoints
+ * ============================================================================= */
+
 import React, { useState, useEffect } from "react";
 import {
   User,

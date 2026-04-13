@@ -1,3 +1,28 @@
+/* =============================================================================
+ * Authentication Controller
+ * =============================================================================
+ * Purpose:
+ *   Implement user auth flows for the EcoTrack backend:
+ *   - Email/password registration & login (JWT + refresh token)
+ *   - OTP verification for email/phone
+ *   - Password reset via OTP
+ *   - Google OAuth login
+ *   - Refresh-token rotation and logout
+ *
+ * Key Exports:
+ *   - register(req,res), login(req,res)
+ *   - googleLogin(req,res)
+ *   - sendOTP(req,res), verifyOTP(req,res)
+ *   - forgotPassword(req,res), verifyResetOTP(req,res), resetPassword(req,res)
+ *   - refreshToken(req,res)
+ *   - logout(req,res)
+ *
+ * Env Vars:
+ *   - JWT_SECRET, JWT_REFRESH_SECRET
+ *   - GOOGLE_CLIENT_ID (+ credentials used by frontend)
+ *   - EMAIL_* and Twilio_* (OTP sending)
+ * ============================================================================= */
+
 const User = require("../models/User");
 const OTP = require("../models/OTP");
 const jwt = require("jsonwebtoken");
@@ -67,11 +92,17 @@ exports.register = async (req, res) => {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
 
-    await sendEmail(
+    const registerEmailResult = await sendEmail(
       email,
       "Verify Your EcoTrack Account",
       `Your OTP is: ${otp}. Valid for 10 minutes.`
     );
+    if (!registerEmailResult?.success) {
+      throw new Error(
+        registerEmailResult?.message ||
+          "Failed to send verification OTP email. Please try again."
+      );
+    }
 
     const tokens = generateTokens(user._id);
     user.refreshToken = tokens.refreshToken;
@@ -222,7 +253,7 @@ exports.refreshToken = async (req, res) => {
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(decoded.id).select("+refreshToken");
     if (!user || user.refreshToken !== refreshToken) {
       return res.status(403).json({
         success: false,
@@ -304,7 +335,16 @@ exports.sendOTP = async (req, res) => {
     });
 
     if (type === "email") {
-      await sendEmail(email, `Your OTP for ${purpose}`, `Your OTP is: ${otp}`);
+      const otpEmailResult = await sendEmail(
+        email,
+        `Your OTP for ${purpose}`,
+        `Your OTP is: ${otp}`
+      );
+      if (!otpEmailResult?.success) {
+        throw new Error(
+          otpEmailResult?.message || "Failed to send OTP email. Please try again."
+        );
+      }
     } else {
       await sendSMS(phone, `Your OTP is: ${otp}`);
     }
@@ -369,36 +409,52 @@ exports.verifyOTP = async (req, res) => {
 =========================================================================== */
 exports.forgotPassword = async (req, res) => {
   try {
-    const { email } = req.body;
+    const normalizedEmail = String(req.body.email || "")
+      .trim()
+      .toLowerCase();
+    if (!normalizedEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
 
-    // SAFE RESPONSE (prevents email enumeration)
-    const genericResponse = {
-      success: true,
-      message: "If an account exists, OTP has been sent to your email.",
-    };
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No account found with this email address.",
+      });
+    }
 
-    const user = await User.findOne({ email });
-    if (!user) return res.json(genericResponse);
-
-    await OTP.deleteMany({ email, purpose: "reset-password" });
+    await OTP.deleteMany({ email: normalizedEmail, purpose: "reset-password" });
 
     const otp = generateOTP();
 
     await OTP.create({
-      email,
+      email: normalizedEmail,
       otp,
       type: "email",
       purpose: "reset-password",
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
 
-    await sendEmail(
-      email,
+    const forgotEmailResult = await sendEmail(
+      normalizedEmail,
       "Reset Your EcoTrack Password",
       `Your OTP for password reset is: ${otp}.`
     );
+    if (!forgotEmailResult?.success) {
+      throw new Error(
+        forgotEmailResult?.message ||
+          "Failed to send password reset OTP email. Please try again."
+      );
+    }
 
-    res.json(genericResponse);
+    res.json({
+      success: true,
+      message: "OTP has been sent to your email address.",
+    });
   } catch (err) {
     console.error("FORGOT PASSWORD ERROR:", err);
     res.status(500).json({

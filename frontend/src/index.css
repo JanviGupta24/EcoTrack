@@ -1,3 +1,14 @@
+/* =============================================================================
+ * Global Styles (Tailwind + App Animations)
+ * =============================================================================
+ * Purpose:
+ *   Provide base Tailwind directives and project-wide CSS tweaks.
+ *
+ Notes:
+ *   - Keep this file focused on global styles only.
+ *   - UI animations are defined here to support className-based transitions.
+ * ============================================================================= */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

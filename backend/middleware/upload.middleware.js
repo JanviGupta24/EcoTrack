@@ -1,4 +1,22 @@
-// middleware/upload.middleware.js
+/* =============================================================================
+ * File Upload Middleware (Multer + Cloudinary)
+ * =============================================================================
+ * Purpose:
+ *   Configure Multer for secure image uploads and provide helpers for:
+ *   - Cloudinary-backed storage
+ *   - File type/size validation
+ *   - Consistent error responses for upload failures
+ *
+ * Exports:
+ *   - `upload`: Multer instance
+ *   - `upload.normalizeFiles(files)`: returns an array of secure URL strings
+ *   - `upload.handleErrors(err, req, res, next)`: Express error handler
+ *
+ * Env Vars:
+ *   - CLOUDINARY_CLOUD_NAME
+ *   - CLOUDINARY_API_KEY
+ *   - CLOUDINARY_API_SECRET
+ * ============================================================================= */
 const multer = require("multer");
 const path = require("path");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");

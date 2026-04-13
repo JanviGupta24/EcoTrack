@@ -1,4 +1,15 @@
-// src/pages/Dashboard.jsx
+/* =============================================================================
+ * Dashboard Page (User)
+ * =============================================================================
+ * Purpose:
+ *   Show the citizen/worker overview dashboard:
+ *   - Waste report status summary
+ *   - Upcoming tasks or progress widgets
+ *   - Quick navigation to core features (report waste, trainings, wallet)
+ *
+ Data:
+ *   Uses `wasteService` and/or user endpoints through the shared axios `api`.
+ * ============================================================================= */
 import React, { useState, useEffect } from "react";
 import {
   LineChart,
@@ -26,6 +37,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { userService, wasteService } from "../api/services";
 import Loader from "../components/Loader";
+import { getApiErrorMessage } from "../utils/errors";
 
 const AnimatedBlock = ({ children, delay = 0 }) => (
   <div className="animate-slideInUp" style={{ animationDelay: `${delay}ms` }}>
@@ -73,9 +85,7 @@ const Dashboard = () => {
         setRecentReports(reportsResponse.data.reports);
       } catch (err) {
         console.error("Dashboard Load Error:", err);
-        setError(
-          err.response?.data?.message || "Could not load dashboard data."
-        );
+        setError(getApiErrorMessage(err, "Could not load dashboard data. Please try again."));
       } finally {
         setLoading(false);
       }

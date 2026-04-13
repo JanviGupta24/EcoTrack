@@ -1,8 +1,17 @@
+/* =============================================================================
+ * Champion Events Page
+ * =============================================================================
+ * Purpose:
+ *   Display upcoming events for `green_champion` users, sourced from the
+ *   backend via `championService.getEvents()`.
+ * ============================================================================= */
+
 import React, { useEffect, useState } from "react";
 import { Calendar, MapPin, Users, AlertCircle } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { championService } from "../../api/services"; // ✅ Correct service
 import Loader from "../../components/Loader";
+import { getApiErrorMessage } from "../../utils/errors";
 
 // 🌿 Animation Wrapper
 const AnimatedBlock = ({ children, delay = 0 }) => (
@@ -28,7 +37,7 @@ const ChampionEvents = () => {
         setEvents(res.data.events || []);
       } catch (err) {
         console.error("Error fetching events:", err);
-        setError("Failed to load Green Champion events. Please try again later.");
+        setError(getApiErrorMessage(err, "Failed to load events. Please try again."));
       } finally {
         setLoading(false);
       }

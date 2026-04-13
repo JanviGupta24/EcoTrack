@@ -1,4 +1,16 @@
-// routes/worker.routes.js
+/* =============================================================================
+ * Worker Routes
+ * =============================================================================
+ * Purpose:
+ *   Expose authenticated worker operations for assigned waste reports:
+ *   - List assigned reports (with optional status filter)
+ *   - Update report status (timeline + notifications handled in controller)
+ *   - View worker stats and daily schedule
+ *
+ * Security:
+ *   All routes require authentication and role authorization via
+ *   `authorize('worker','super_admin')` middleware.
+ * ============================================================================= */
 const express = require('express');
 const router = express.Router();
 const workerController = require('../controllers/worker.controller');

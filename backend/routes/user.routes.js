@@ -1,4 +1,14 @@
-// routes/user.routes.js
+/* =============================================================================
+ * User Routes
+ * =============================================================================
+ * Purpose:
+ *   Provide authenticated user operations:
+ *   - Get/update profile
+ *   - Upload avatar (Cloudinary-backed)
+ *   - Retrieve user stats and global leaderboard
+ *
+ * Mounted under `/api/users`.
+ * ============================================================================= */
 const express = require("express");
 const router = express.Router();
 

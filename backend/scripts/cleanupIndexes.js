@@ -1,4 +1,17 @@
-// cleanupIndexes.js
+/* =============================================================================
+ * MongoDB Index Cleanup Script
+ * =============================================================================
+ * Purpose:
+ *   Connect to the configured MongoDB database and (optionally) normalize
+ *   indexes by removing duplicated or outdated indexes.
+ *
+ * Notes:
+ *   - Intended for development/ops maintenance, not for production runtime.
+ *   - Uses `process.env.MONGODB_URI`.
+ *
+ * Env Vars:
+ *   - MONGODB_URI
+ * ============================================================================= */
 const mongoose = require("mongoose");
 
 require("dotenv").config();

@@ -1,4 +1,21 @@
-// utils/sms.js
+/* =============================================================================
+ * SMS Utility (Twilio)
+ * =============================================================================
+ * Purpose:
+ *   Send OTP and SMS notifications via Twilio if credentials are configured.
+ *
+ * Exports:
+ *   - sendSMS(toPhone, message)
+ *
+ * Behavior:
+ *   - If TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN are missing, SMS sending is
+ *     disabled and callers should handle failures gracefully.
+ *
+ * Env Vars:
+ *   - TWILIO_ACCOUNT_SID
+ *   - TWILIO_AUTH_TOKEN
+ *   - DEFAULT_COUNTRY_CODE (optional; default: +91)
+ * ============================================================================= */
 const twilio = require("twilio");
 
 /* -------------------------------------------------------------------------- */

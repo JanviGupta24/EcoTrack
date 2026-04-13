@@ -1,4 +1,14 @@
-// src/context/ThemeContext.js
+/* =============================================================================
+ * Theme Context (Light/Dark)
+ * =============================================================================
+ * Purpose:
+ *   Provide a global theme toggle that adds `light`/`dark` classes to the
+ *   document element.
+ *
+ Key Behavior:
+ *   - Persists chosen theme in `localStorage`
+ *   - Exposes `useTheme()` and `ThemeProvider`
+ * ============================================================================= */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();

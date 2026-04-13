@@ -1,4 +1,14 @@
-// src/pages/Profile.jsx
+/* =============================================================================
+ * Profile Page
+ * =============================================================================
+ * Purpose:
+ *   Allow authenticated users to view and update their profile details:
+ *   - Name, phone, and address/location fields
+ *   - Avatar upload (Cloudinary-backed via backend)
+ *
+ Data:
+ *   Uses `userService.getProfile()` and `userService.updateProfile()`.
+ * ============================================================================= */
 import React, { useState, useRef, useEffect } from "react";
 import {
   Camera,
@@ -18,6 +28,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { userService } from "../api/services";
 import AppLoader from "../components/Loader"; // Use AppLoader to avoid conflict
+import { getApiErrorMessage } from "../utils/errors";
 
 // --- Define Eco Level System ---
 const getEcoLevel = (points) => {
@@ -107,7 +118,7 @@ const Profile = () => {
     } catch (error) {
       setMessage({
         type: "error",
-        content: error.response?.data?.message || "Failed to update profile.",
+        content: getApiErrorMessage(error, "Failed to update profile. Please try again."),
       });
     } finally {
       setLoading(false);
@@ -132,7 +143,7 @@ const Profile = () => {
     } catch (error) {
       setMessage({
         type: "error",
-        content: error.response?.data?.message || "Failed to upload avatar.",
+        content: getApiErrorMessage(error, "Failed to upload avatar. Please try again."),
       });
     } finally {
       setAvatarLoading(false);

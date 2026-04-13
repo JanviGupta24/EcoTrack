@@ -1,4 +1,14 @@
-// src/pages/ForgotPassword.jsx
+/* =============================================================================
+ * Forgot Password Page
+ * =============================================================================
+ * Purpose:
+ *   Initiate password reset by sending an OTP to the user (email/phone).
+ *
+ * Key Behaviors:
+ *   - Validates that an email/phone identifier is provided
+ *   - Calls `AuthContext` / auth API to request an OTP
+ *   - Redirects user to OTP verification screen
+ ============================================================================= */
 import React, { useState } from "react";
 import {
   Mail,
@@ -8,8 +18,9 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import AuthLayout from "../components/AuthLayout";
+import api from "../api/axios";
+import { getApiErrorMessage } from "../utils/errors";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -29,17 +40,18 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post("/api/auth/forgot-password", { email });
+      const res = await api.post("/auth/forgot-password", {
+        email: email.trim().toLowerCase(),
+      });
 
-      setSuccess("OTP sent to your email!");
+      setSuccess(res?.data?.message || "OTP sent to your email!");
       setTimeout(() => {
-        navigate("/verify-reset-otp", { state: { email } });
+        navigate("/verify-reset-otp", {
+          state: { email: email.trim().toLowerCase() },
+        });
       }, 900);
     } catch (err) {
-      setError(
-        err?.response?.data?.message ||
-          "Unable to send reset OTP. Try again later."
-      );
+      setError(getApiErrorMessage(err, "Unable to send reset OTP. Please try again."));
     } finally {
       setLoading(false);
     }

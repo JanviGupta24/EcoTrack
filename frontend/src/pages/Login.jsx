@@ -1,4 +1,16 @@
-// src/pages/Login.jsx
+/* =============================================================================
+ * Login Page
+ * =============================================================================
+ * Purpose:
+ *   Allow users to sign in using:
+ *   - Email/password login
+ *   - Optional Google OAuth login (when `REACT_APP_GOOGLE_CLIENT_ID` exists)
+ *
+ Key Behaviors:
+ *   - Calls `AuthContext.login()` for email/password
+ *   - Calls `AuthContext.googleLogin()` for Google OAuth
+ *   - Redirects based on the authenticated user's role
+ * ============================================================================= */
 import React, { useState } from "react";
 import {
   Mail,
@@ -12,9 +24,12 @@ import {
 import AuthLayout from "../components/AuthLayout";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link, useLocation } from "react-router-dom";
+import { getApiErrorMessage } from "../utils/errors";
 
 // ⭐ Import Google Login component
 import { GoogleLogin } from "@react-oauth/google";
+
+const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID?.trim();
 
 const Login = () => {
   const { login, googleLogin } = useAuth();
@@ -63,7 +78,7 @@ const Login = () => {
         setError(result.message || "Invalid credentials");
       }
     } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
+      setError(getApiErrorMessage(err, "Unable to log in. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -86,7 +101,7 @@ const Login = () => {
         setError(result.message || "Google login failed.");
       }
     } catch (err) {
-      setError("An unexpected error occurred.");
+      setError(getApiErrorMessage(err, "Google login failed. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -201,33 +216,35 @@ const Login = () => {
         </button>
       </form>
 
-      {/* Divider */}
-      <div
-        className="relative my-6 animate-slideInUp"
-        style={{ animationDelay: "500ms" }}
-      >
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
-            Or continue with
-          </span>
-        </div>
-      </div>
+      {googleClientId ? (
+        <>
+          <div
+            className="relative my-6 animate-slideInUp"
+            style={{ animationDelay: "500ms" }}
+          >
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
+                Or continue with
+              </span>
+            </div>
+          </div>
 
-      {/* ⭐ REAL GOOGLE LOGIN BUTTON (wrapped inside your existing UI) */}
-      <div
-        className="w-full flex items-center justify-center animate-slideInUp"
-        style={{ animationDelay: "600ms" }}
-      >
-        <GoogleLogin
-          onSuccess={(credentialResponse) =>
-            handleGoogleLogin(credentialResponse.credential)
-          }
-          onError={() => setError("Google Login failed. Try again.")}
-        />
-      </div>
+          <div
+            className="w-full flex items-center justify-center animate-slideInUp"
+            style={{ animationDelay: "600ms" }}
+          >
+            <GoogleLogin
+              onSuccess={(credentialResponse) =>
+                handleGoogleLogin(credentialResponse.credential)
+              }
+              onError={() => setError("Google Login failed. Try again.")}
+            />
+          </div>
+        </>
+      ) : null}
 
       {/* Register */}
       <p

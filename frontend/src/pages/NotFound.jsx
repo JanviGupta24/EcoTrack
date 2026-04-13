@@ -1,4 +1,9 @@
-// src/pages/NotFound.jsx
+/* =============================================================================
+ * Not Found Page
+ * =============================================================================
+ * Purpose:
+ *   Provide a friendly 404 UI for unmatched routes.
+ * ============================================================================= */
 import React from 'react';
 import { Home, Compass } from 'lucide-react'; // Changed Search to Compass for a "lost" theme
 import { useNavigate } from 'react-router-dom';

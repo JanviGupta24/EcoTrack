@@ -1,4 +1,13 @@
-// src/components/Footer.jsx
+/* =============================================================================
+ * Footer Component
+ * =============================================================================
+ * Purpose:
+ *   Display the public footer content across the app, including policy links
+ *   and a consistent EcoTrack branding section.
+ *
+ * Dependencies:
+ *   - `react-router-dom` Link components (for internal navigation)
+ * ============================================================================= */
 import React from "react";
 import {
   Leaf,

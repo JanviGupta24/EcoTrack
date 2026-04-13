@@ -1,4 +1,16 @@
-// routes/training.routes.js
+/* =============================================================================
+ * Training Routes
+ * =============================================================================
+ * Purpose:
+ *   Route authenticated course/training operations under `/api/training`:
+ *   - list courses and fetch course detail
+ *   - enroll/complete courses
+ *   - manage and retrieve course progress
+ *   - fetch user certificates
+ *
+ * Security:
+ *   All endpoints require authentication (`authenticate` middleware).
+ * ============================================================================= */
 const express = require('express');
 const router = express.Router();
 const trainingController = require('../controllers/training.controller');

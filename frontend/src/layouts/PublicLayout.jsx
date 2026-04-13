@@ -1,4 +1,12 @@
-// src/layouts/PublicLayout.jsx
+/* =============================================================================
+ * PublicLayout Component
+ * =============================================================================
+ * Purpose:
+ *   Provide the application shell for public pages (unauthenticated):
+ *   - Renders `PublicNavbar`
+ *   - Provides an `<Outlet />` for nested route components
+ *   - Renders `Footer` below the outlet content
+ * ============================================================================= */
 import React from "react";
 import { Outlet } from "react-router-dom";
 import PublicNavbar from "../components/PublicNavbar";

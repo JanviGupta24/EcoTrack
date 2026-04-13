@@ -1,4 +1,17 @@
-// models/Facility.js
+/* =============================================================================
+ * Facility Model
+ * =============================================================================
+ * Purpose:
+ *   Store waste handling facilities (collection centers, recycling plants, etc.)
+ *   with GeoJSON location, capacity/current load, accepted waste types,
+ *   and availability status.
+ *
+ * Key Behaviors:
+ *   - Geo index on `location` for proximity queries
+ *   - Virtual `loadPercentage`
+ *   - Pre-save hook updates `status` based on `currentLoad` vs `capacity`
+ *   - Static helpers: `findNearby`, `incrementProcessed`
+ * ============================================================================= */
 const mongoose = require("mongoose");
 
 const facilitySchema = new mongoose.Schema(
@@ -158,13 +171,12 @@ facilitySchema.virtual("loadPercentage").get(function () {
 /* ---------------------------------------------------------
     PRE-SAVE — Auto-update status
 --------------------------------------------------------- */
-facilitySchema.pre("save", function (next) {
+facilitySchema.pre("save", function () {
   if (this.currentLoad >= this.capacity) {
     this.status = "full";
   } else if (this.status === "full" && this.currentLoad < this.capacity) {
     this.status = "active";
   }
-  next();
 });
 
 /* ---------------------------------------------------------

@@ -1,3 +1,15 @@
+/* =============================================================================
+ * Champion Dashboard Page
+ * =============================================================================
+ * Purpose:
+ *   Provide a `green_champion` user experience:
+ *   - community-focused overview dashboard
+ *   - engagement metrics and navigation
+ *
+ Data:
+ *   Uses `championService.getDashboard()` via the shared API layer.
+ * ============================================================================= */
+
 import React, { useState, useEffect } from "react";
 import {
   LineChart,
@@ -26,6 +38,7 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { championService } from "../../api/services"; // ✅ Use Champion Service
 import Loader from "../../components/Loader";
+import { getApiErrorMessage } from "../../utils/errors";
 
 // 🌿 Animation Wrapper
 const AnimatedBlock = ({ children, delay = 0 }) => (
@@ -95,7 +108,7 @@ const ChampionDashboard = () => {
         setUpcomingEvents(eventsResponse.data.events || []);
       } catch (err) {
         console.error("Error loading Champion Dashboard:", err);
-        setError("Could not load Green Champion Dashboard data.");
+        setError(getApiErrorMessage(err, "Could not load dashboard data. Please try again."));
       } finally {
         setLoading(false);
       }

@@ -1,4 +1,15 @@
-// controllers/training.controller.js
+/* =============================================================================
+ * Training Controller
+ * =============================================================================
+ * Purpose:
+ *   Manage training courses and the learner journey:
+ *   - Course listing and course detail
+ *   - Enroll/complete courses
+ *   - Track user progress (lessons/quizzes/assignments)
+ *   - Issue/retrieve certificates
+ *
+ * Mounted under `/api/training` via `routes/training.routes.js`.
+ * ============================================================================= */
 const Training = require("../models/Training");
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
@@ -16,14 +27,28 @@ exports.getCourses = async (req, res) => {
     if (difficulty) filter.difficulty = difficulty;
     if (search) filter.$text = { $search: search };
 
-    const courses = await Training.find(filter).select(
-      "title description category difficulty ecoPointsReward estimatedTime isActive createdAt updatedAt"
-    );
+    const courses = await Training.find(filter)
+      .select(
+        "title description category difficulty ecoPointsReward estimatedTime isActive createdAt updatedAt modules enrolledUsers completedUsers thumbnail"
+      )
+      .lean();
+
+    const userId = req.user?._id;
+    const normalizedCourses = courses.map((c) => ({
+      ...c,
+      moduleCount: Array.isArray(c.modules) ? c.modules.length : 0,
+      isEnrolled: userId
+        ? (c.enrolledUsers || []).some((id) => String(id) === String(userId))
+        : false,
+      isCompleted: userId
+        ? (c.completedUsers || []).some((id) => String(id) === String(userId))
+        : false,
+    }));
 
     return res.status(200).json({
       success: true,
-      count: courses.length,
-      courses,
+      count: normalizedCourses.length,
+      courses: normalizedCourses,
     });
   } catch (error) {
     console.error("getCourses Error:", error);
@@ -75,7 +100,10 @@ exports.enrollCourse = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Course not found" });
 
-    if (course.enrolledUsers.includes(req.user._id))
+    const alreadyEnrolled = course.enrolledUsers.some((id) =>
+      id.equals(req.user._id)
+    );
+    if (alreadyEnrolled)
       return res
         .status(400)
         .json({ success: false, message: "Already enrolled in this course" });
@@ -108,10 +136,19 @@ exports.completeCourse = async (req, res) => {
 
     const userId = req.user._id;
 
-    if (course.completedUsers.includes(userId))
+    const isCompleted = course.completedUsers.some((id) => id.equals(userId));
+    if (isCompleted)
       return res
         .status(400)
         .json({ success: false, message: "Course already completed" });
+
+    const isEnrolled = course.enrolledUsers.some((id) => id.equals(userId));
+    if (!isEnrolled) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enroll in this course before marking it as completed.",
+      });
+    }
 
     // --- Optional quiz scoring ---
     let totalQuestions = 0,
@@ -226,13 +263,34 @@ exports.getCourseProgress = async (req, res) => {
         .status(404)
         .json({ success: false, message: "User not found" });
 
+    const course = await Training.findById(req.params.id).select(
+      "modules assignments"
+    );
+    if (!course) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found" });
+    }
+
     const progress = user.progress?.[req.params.id] || {
       lessons: [],
       quizzes: [],
       assignments: [],
     };
 
-    return res.status(200).json({ success: true, progress });
+    const totals = {
+      lessons: Array.isArray(course.modules) ? course.modules.length : 0,
+      quizzes: Array.isArray(course.modules)
+        ? course.modules.filter(
+            (m) => Array.isArray(m.quiz) && m.quiz.length > 0
+          ).length
+        : 0,
+      assignments: Array.isArray(course.assignments)
+        ? course.assignments.length
+        : 0,
+    };
+
+    return res.status(200).json({ success: true, progress, totals });
   } catch (error) {
     console.error("getCourseProgress Error:", error);
     return res.status(500).json({ success: false, message: "Server error" });
@@ -252,6 +310,45 @@ exports.updateCourseProgress = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Invalid progress type" });
 
+    const course = await Training.findById(req.params.id).select(
+      "modules assignments enrolledUsers"
+    );
+    if (!course) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found" });
+    }
+
+    const isEnrolled = course.enrolledUsers.some((id) =>
+      id.equals(req.user._id)
+    );
+    if (!isEnrolled) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enroll in this course first.",
+      });
+    }
+
+    const index = Number(moduleIndex);
+    if (!Number.isInteger(index) || index < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "moduleIndex must be a non-negative integer.",
+      });
+    }
+
+    const maxIndexByType = {
+      lessons: (course.modules?.length || 1) - 1,
+      quizzes: (course.modules?.length || 1) - 1,
+      assignments: (course.assignments?.length || 1) - 1,
+    };
+    if (index > maxIndexByType[type]) {
+      return res.status(400).json({
+        success: false,
+        message: "moduleIndex is out of range for this course.",
+      });
+    }
+
     const user = await User.findById(req.user._id);
     if (!user)
       return res
@@ -267,8 +364,8 @@ exports.updateCourseProgress = async (req, res) => {
       };
     }
 
-    if (!user.progress[req.params.id][type].includes(moduleIndex)) {
-      user.progress[req.params.id][type].push(moduleIndex);
+    if (!user.progress[req.params.id][type].includes(index)) {
+      user.progress[req.params.id][type].push(index);
     }
 
     await user.save();

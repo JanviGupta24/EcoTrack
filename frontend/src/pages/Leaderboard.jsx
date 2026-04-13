@@ -1,9 +1,19 @@
-// src/pages/Leaderboard.jsx
+/* =============================================================================
+ * Leaderboard Page
+ * =============================================================================
+ * Purpose:
+ *   Display global leaderboard of users (eco points) and/or green champions.
+ *
+ * Data:
+ *   - Fetches leaderboard data via `userService.getLeaderboard()`
+ *   - Supports query parameters like timeframe/page if implemented by backend
+ * ============================================================================= */
 import React, { useState, useEffect } from "react";
 import { Trophy, Crown, AlertCircle } from "lucide-react";
 import { userService } from "../api/services";
 import { useAuth } from "../context/AuthContext";
 import AppLoader from "../components/Loader"; // Renamed to avoid icon conflict
+import { getApiErrorMessage } from "../utils/errors";
 
 // We assume the keyframes 'animate-slideInUp' are defined globally 
 // in App.js or index.css, as established in previous files.
@@ -70,7 +80,7 @@ const Leaderboard = () => {
         setCurrentUserRank(response.data.currentUser);
         
       } catch (err) {
-        setError(err.response?.data?.message || "Failed to load leaderboard");
+        setError(getApiErrorMessage(err, "Failed to load leaderboard. Please try again."));
       } finally {
         setLoading(false);
       }

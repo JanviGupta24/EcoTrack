@@ -1,4 +1,15 @@
-// src/components/Loader.jsx
+/* =============================================================================
+ * Loader Component
+ * =============================================================================
+ * Purpose:
+ *   Render a full-screen, branded loading indicator used during:
+ *   - initial app load
+ *   - auth state checks
+ *   - route transitions requiring data
+ *
+ Props:
+ *   - `text` (optional): helper message displayed under the spinner.
+ * ============================================================================= */
 import React from 'react';
 import { Leaf } from 'lucide-react';
 

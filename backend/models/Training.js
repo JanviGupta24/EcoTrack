@@ -1,4 +1,16 @@
-// models/Training.js
+/* =============================================================================
+ * Training Model (Courses + Modules + Quizzes)
+ * =============================================================================
+ * Purpose:
+ *   Represent eco-education courses with:
+ *   - Modules and quiz content
+ *   - Enrollments and user progress tracking
+ *   - Eco-point rewards and certificate issuance
+ *
+ * Notes:
+ *   - This model is used heavily by `/api/training/*` routes.
+ *   - Includes validation constraints to keep quiz/module structures coherent.
+ * ============================================================================= */
 const mongoose = require("mongoose");
 
 /* -------------------------------------------------------------------------- */

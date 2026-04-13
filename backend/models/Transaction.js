@@ -1,4 +1,20 @@
-// models/Transaction.js
+/* =============================================================================
+ * Transaction Model (Wallet / Eco Points)
+ * =============================================================================
+ * Purpose:
+ *   Record wallet-related events:
+ *   - eco-points earning and redemption
+ *   - payment received (gateway status tracking)
+ *   - reward claims and wallet top-ups
+ *
+ * Key Behaviors:
+ *   - References `userId` and optionally links to related objects
+ *   - Tracks `status` and payment identifiers (`paymentId`, `orderId`)
+ *   - Holds flexible `metadata` for gateway-specific payloads
+ *
+ * Env Vars:
+ *   None.
+ * ============================================================================= */
 // ------------------------------------------------------------
 // CLEAN VERSION — duplicate indexes removed safely
 // Fully commented version for clarity
@@ -31,6 +47,7 @@ const transactionSchema = new mongoose.Schema(
         "eco-points-redeemed",
         "payment-received",
         "wallet-topup",
+        "wallet-withdrawal",
         "reward-claimed",
       ],
       required: true,
@@ -52,7 +69,6 @@ const transactionSchema = new mongoose.Schema(
     ecoPoints: {
       type: Number,
       default: 0,
-      min: 0,
     },
 
     description: {

@@ -1,4 +1,21 @@
-// utils/ai.js (Gemini Vision - OLD SDK CORRECTED)
+/* =============================================================================
+ * AI Utilities (Gemini - Waste Classification)
+ * =============================================================================
+ * Purpose:
+ *   Provide a helper used by the waste-report flow to classify an uploaded
+ *   waste image and infer the likely waste type.
+ *
+ * Usage:
+ *   `exports.classifyWaste(imageUrl)` returns a structured prediction payload
+ *   that can be stored as `aiPrediction` on the `WasteReport` document.
+ *
+ * Env Vars:
+ *   - GEMINI_API_KEY
+ *
+ * Notes:
+ *   - If `GEMINI_API_KEY` is missing, the API may not be able to classify and
+ *     the caller should handle failures gracefully.
+ * ============================================================================= */
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 if (!process.env.GEMINI_API_KEY) {

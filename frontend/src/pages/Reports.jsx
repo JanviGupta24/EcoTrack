@@ -1,3 +1,19 @@
+/* =============================================================================
+ * Reports Page
+ * =============================================================================
+ * Purpose:
+ *   Render a searchable/listable view of waste reports tailored to the
+ *   authenticated user's role (user/worker/admin).
+ *
+ Key Features:
+ *   - Filter reports by status
+ *   - Search by waste type/location (client-side)
+ *   - View report details in a modal
+ *
+ Dependencies:
+ *   - `wasteService.getReports()` for retrieving report lists
+ * ============================================================================= */
+
 import React, { useState, useEffect } from 'react';
 import {
   Search, MapPin, Calendar, Clock, CheckCircle,
@@ -5,6 +21,7 @@ import {
 } from 'lucide-react';
 import { wasteService } from '../api/services';
 import AppLoader from '../components/Loader'; // Loader component
+import { getApiErrorMessage } from "../utils/errors";
 
 // Animated wrapper
 const AnimatedBlock = ({ children, delay = 0, className = "" }) => (
@@ -156,7 +173,7 @@ const Reports = () => {
       setTotalPages(response.data.totalPages || 1);
       setTotalReports(response.data.total || 0);
     } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to fetch reports');
+      setError(getApiErrorMessage(err, "Failed to fetch reports. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -186,7 +203,7 @@ const Reports = () => {
       setReports(prev => prev.filter(r => r._id !== reportId));
       setTotalReports(prev => Math.max(0, prev - 1));
     } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to delete report');
+      setError(getApiErrorMessage(err, "Failed to delete report. Please try again."));
     }
   };
 

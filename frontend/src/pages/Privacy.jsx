@@ -1,4 +1,12 @@
-// src/pages/Privacy.jsx
+/* =============================================================================
+ * Privacy Policy Page
+ * =============================================================================
+ * Purpose:
+ *   Present the privacy policy for the EcoTrack application.
+ *
+ Notes:
+ *   UI-only content; no API calls in this page.
+ * ============================================================================= */
 import React, { useState, useEffect, useRef } from 'react';
 import { Lock, Cookie, UserCheck } from 'lucide-react';
 

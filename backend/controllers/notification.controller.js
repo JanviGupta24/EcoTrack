@@ -1,4 +1,21 @@
-// controllers/notification.controller.js
+/* =============================================================================
+ * Notifications Controller (In-app)
+ * =============================================================================
+ * Purpose:
+ *   Provide CRUD-like endpoints for user notifications:
+ *   - List notifications (paginated, optional unread-only filtering)
+ *   - Mark single/multiple/all notifications as read
+ *   - Archive notifications (soft delete)
+ *   - Delete notifications (hard delete)
+ *
+ * Exports:
+ *   - getNotifications
+ *   - markAsRead
+ *   - markMultipleAsRead
+ *   - markAllAsRead
+ *   - archiveNotification
+ *   - deleteNotification
+ * ============================================================================= */
 const Notification = require('../models/Notification');
 
 /**

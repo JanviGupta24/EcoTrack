@@ -1,4 +1,16 @@
-// src/components/PublicNavbar.jsx
+/* =============================================================================
+ * PublicNavbar Component
+ * =============================================================================
+ * Purpose:
+ *   Render navigation for public (unauthenticated) pages, including:
+ *   - Branding/logo
+ *   - Links to informational pages
+ *   - Login/register actions
+ *
+ * Dependencies:
+ *   - `frontend/src/context/ThemeContext` for theme toggling
+ *   - `react-router-dom` for routing
+ * ============================================================================= */
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Leaf, Menu, X, Sun, Moon } from "lucide-react";

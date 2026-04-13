@@ -1,4 +1,17 @@
-// routes/payment.routes.js
+/* =============================================================================
+ * Payment Routes (Wallet + Razorpay)
+ * =============================================================================
+ * Purpose:
+ *   Route requests under `/api/payments` to payment controller methods:
+ *   - create-order: create Razorpay order for wallet top-up
+ *   - verify: verify Razorpay payment signature and update wallet
+ *   - redeem: redeem eco-points into wallet balance
+ *   - transactions: fetch wallet transaction history
+ *   - wallet: fetch wallet summary for current user
+ *
+ * Security:
+ *   All endpoints require authentication via `authenticate` middleware.
+ * ============================================================================= */
 const express = require('express');
 const router = express.Router();
 const paymentController = require('../controllers/payment.controller');
@@ -38,5 +51,12 @@ router.get('/transactions', authenticate, paymentController.getTransactions);
  * @access  Private
  */
 router.get('/wallet', authenticate, paymentController.getWallet);
+
+/**
+ * @route   POST /api/payments/withdraw
+ * @desc    Create a wallet withdrawal request (manual payout)
+ * @access  Private
+ */
+router.post('/withdraw', authenticate, paymentController.requestWithdraw);
 
 module.exports = router;

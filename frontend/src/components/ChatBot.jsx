@@ -1,4 +1,19 @@
-// src/components/ChatBot.jsx
+/* =============================================================================
+ * ChatBot Component (EcoBot UI)
+ * =============================================================================
+ * Purpose:
+ *   Provide an on-page AI chat widget that communicates with the backend
+ *   `/api/ai/chatbot` endpoint.
+ *
+ * Key Features:
+ *   - Toggleable floating chat button
+ *   - Maintains conversation history locally for context
+ *   - Auto-scrolls on new messages
+ *   - Handles backend errors by showing a friendly fallback message
+ *
+ Dependencies:
+ *   - `frontend/src/api/services.js` -> `aiService.chatbot()`
+ * ============================================================================= */
 import React, { useState, useEffect, useRef } from 'react';
 // 1. Import MessageSquare for consistency
 import { Leaf, X, Send, MessageSquare } from 'lucide-react';

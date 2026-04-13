@@ -1,4 +1,22 @@
-// src/App.jsx
+/* =============================================================================
+ * Frontend App Router
+ * =============================================================================
+ * Purpose:
+ *   Configure React Router routes for all public and authenticated screens in
+ *   the EcoTrack frontend.
+ *
+ * Key Responsibilities:
+ *   - Wrap the app with Theme + Auth providers and Google OAuth provider.
+ *   - Define route guards for role-based access:
+ *     - Worker: `/app/worker`
+ *     - Admin/Super Admin: `/app/admin`
+ *     - Green Champion: `/app/champion`
+ *   - Lazy-load pages to improve initial load performance.
+ *
+ External Dependencies:
+ *   - `react-router-dom` (routing + guards)
+ *   - `@react-oauth/google` (Google OAuth provider)
+ * ============================================================================= */
 import React, { Suspense, lazy } from "react";
 import {
   BrowserRouter as Router,
@@ -99,10 +117,9 @@ const PublicOnlyRouteWrapper = ({ element }) => {
 
 /* -------------------- App Root -------------------- */
 function App() {
-  const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+  const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID?.trim();
 
-  return (
-    <GoogleOAuthProvider clientId={googleClientId}>
+  const appTree = (
       <Router>
         <ThemeProvider>
           <AuthProvider>
@@ -239,8 +256,17 @@ function App() {
           </AuthProvider>
         </ThemeProvider>
       </Router>
-    </GoogleOAuthProvider>
   );
+
+  if (googleClientId) {
+    return (
+      <GoogleOAuthProvider clientId={googleClientId}>
+        {appTree}
+      </GoogleOAuthProvider>
+    );
+  }
+
+  return appTree;
 }
 
 export default App;

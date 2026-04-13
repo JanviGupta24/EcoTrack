@@ -1,4 +1,14 @@
-// src/pages/VerifyResetOTP.jsx
+/* =============================================================================
+ * Verify Reset OTP Page
+ * =============================================================================
+ * Purpose:
+ *   Verify OTP submitted by the user as part of the password reset flow.
+ *
+ * Behavior:
+ *   - Accepts email + OTP
+ *   - Calls auth verify endpoint via `AuthContext.verifyResetOTP`
+ *   - Redirects to the new password entry page
+ * ============================================================================= */
 import React, { useState, useEffect } from "react";
 import {
   KeyRound,
@@ -9,8 +19,9 @@ import {
   CheckCircle,
 } from "lucide-react";
 import AuthLayout from "../components/AuthLayout";
-import axios from "axios";
+import api from "../api/axios";
 import { useLocation, useNavigate, Link } from "react-router-dom";
+import { getApiErrorMessage } from "../utils/errors";
 
 const VerifyResetOTP = () => {
   const location = useLocation();
@@ -42,14 +53,14 @@ const VerifyResetOTP = () => {
     try {
       setLoading(true);
 
-      await axios.post("/api/auth/verify-reset-otp", { email, otp });
+      await api.post("/auth/verify-reset-otp", { email, otp });
 
       setSuccess("OTP Verified! Redirecting...");
       setTimeout(() => {
         navigate("/reset-password", { state: { email } });
       }, 900);
     } catch (err) {
-      setError(err.response?.data?.message || "Invalid OTP.");
+      setError(getApiErrorMessage(err, "Invalid OTP. Please check the code and try again."));
     } finally {
       setLoading(false);
     }
@@ -62,11 +73,11 @@ const VerifyResetOTP = () => {
 
     try {
       setResendLoading(true);
-      await axios.post("/api/auth/forgot-password", { email });
+      await api.post("/auth/forgot-password", { email });
       setSuccess("OTP resent successfully!");
       setTimer(30);
     } catch (err) {
-      setError("Unable to resend OTP.");
+      setError(getApiErrorMessage(err, "Unable to resend OTP. Please try again."));
     } finally {
       setResendLoading(false);
     }

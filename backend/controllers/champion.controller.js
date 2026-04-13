@@ -1,4 +1,17 @@
-// controllers/champion.controller.js
+/* =============================================================================
+ * Champion Controller (Green Champion Role)
+ * =============================================================================
+ * Purpose:
+ *   Provide endpoints used by `green_champion` users to access:
+ *   - Community dashboards
+ *   - Associated waste reports and engagement metrics
+ *   - Events list
+ *   - Public learning/community resources
+ *
+ * Env Vars:
+ *   - None required by default.
+ * ============================================================================= */
+
 const User = require("../models/User");
 const WasteReport = require("../models/WasteReport");
 const Event = require("../models/Event");

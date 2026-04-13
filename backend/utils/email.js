@@ -1,4 +1,14 @@
-// utils/email.js
+/* =============================================================================
+ * Email Utility (Nodemailer)
+ * =============================================================================
+ * Purpose:
+ *   Provide a single `sendEmail()` helper used by authentication flows
+ *   (verification OTP) and user notifications.
+ *
+ * Env Vars:
+ *   - EMAIL_HOST, EMAIL_PORT
+ *   - EMAIL_USER, EMAIL_PASS
+ * ============================================================================= */
 const nodemailer = require("nodemailer");
 
 /* -------------------------------------------------------------------------- */

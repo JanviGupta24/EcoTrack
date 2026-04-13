@@ -1,7 +1,19 @@
+/* =============================================================================
+ * Notifications Page
+ * =============================================================================
+ * Purpose:
+ *   Display and manage in-app notifications for the authenticated user.
+ *
+ * Key Behaviors:
+ *   - Fetches notifications from `notificationService.getNotifications()`
+ *   - Supports marking items as read, archiving, and deleting
+ * ============================================================================= */
+
 import React, { useEffect, useState } from "react";
 import { Bell, Loader, CheckCircle, Trash2, ArrowLeft } from "lucide-react";
 import { notificationService } from "../api/services";
 import { useNavigate } from "react-router-dom";
+import { getApiErrorMessage } from "../utils/errors";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -18,7 +30,7 @@ const Notifications = () => {
       setNotifications(res.data.notifications || []);
     } catch (err) {
       console.error("Failed to fetch notifications:", err);
-      setError(err.response?.data?.message || "Failed to load notifications.");
+      setError(getApiErrorMessage(err, "Failed to load notifications. Please try again."));
     } finally {
       setLoading(false);
     }

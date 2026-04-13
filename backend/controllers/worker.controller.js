@@ -1,4 +1,15 @@
-// controllers/worker.controller.js
+/* =============================================================================
+ * Worker Controller
+ * =============================================================================
+ * Purpose:
+ *   Provide worker-specific endpoints:
+ *   - Fetch assigned reports by status
+ *   - Update report status with timeline + notifications
+ *   - Fetch worker performance stats
+ *   - Retrieve daily work schedule
+ *
+ * Mounted under `/api/workers` (routes in `routes/worker.routes.js`).
+ * ============================================================================= */
 const WasteReport = require('../models/WasteReport');
 const User = require('../models/User');
 const { createNotification } = require('../utils/notification');

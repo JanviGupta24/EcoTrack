@@ -1,4 +1,16 @@
-// routes/ai.routes.js
+/* =============================================================================
+ * AI Routes
+ * =============================================================================
+ * Purpose:
+ *   Expose authenticated AI endpoints used by the EcoTrack frontend:
+ *   - `POST /api/ai/chatbot`
+ *   - `POST /api/ai/classify-waste` (and alias `POST /api/ai/classify`)
+ *   - `POST /api/ai/generate-insights`
+ *   - `POST /api/ai/generate-quiz`
+ *
+ * Security:
+ *   All routes require `authenticate` middleware.
+ * ============================================================================= */
 const express = require('express');
 const router = express.Router();
 const aiController = require('../controllers/ai.controller');
@@ -19,6 +31,8 @@ router.post('/chatbot', authenticate, aiController.chatbot);
  * @access  Private (Authenticated users)
  */
 router.post('/classify-waste', authenticate, aiController.classifyWaste);
+/** @route POST /api/ai/classify — alias used by the React client */
+router.post('/classify', authenticate, aiController.classifyWaste);
 
 /**
  * @route   POST /api/ai/generate-insights

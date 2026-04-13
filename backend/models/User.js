@@ -1,4 +1,19 @@
-// models/User.js
+/* =============================================================================
+ * User Model
+ * =============================================================================
+ * Purpose:
+ *   Store authentication/account data and user-specific domain fields for EcoTrack:
+ *   - JWT refresh token storage (select: false fields for security)
+ *   - Role-based access (`user`, `worker`, `admin`, `super_admin`, `green_champion`)
+ *   - Eco points and wallet balance
+ *   - Verification flags (email/phone)
+ *   - Geo location data for nearby facilities and analytics
+ *   - Worker tracking fields and training/certification sub-documents
+ *
+ * Key Security Behaviors:
+ *   - Password hashing via `pre('save')` hook
+ *   - `toJSON()` removes `password` and `refreshToken`
+ * ============================================================================= */
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
@@ -119,6 +134,18 @@ const userSchema = new mongoose.Schema(
     ],
 
     /* ---------------------------------------------------------
+        TRAINING PROGRESS
+        - keyed by courseId
+        - shape: {
+            [courseId]: { lessons: number[], quizzes: number[], assignments: number[] }
+          }
+    --------------------------------------------------------- */
+    progress: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
+
+    /* ---------------------------------------------------------
         WORKER & CHAMPION DATA
     --------------------------------------------------------- */
     assignedArea: { type: String },
@@ -143,29 +170,24 @@ userSchema.index({ location: "2dsphere" });
 /* ---------------------------------------------------------
     PASSWORD HASHING BEFORE SAVE
 --------------------------------------------------------- */
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
   // Skip hashing ONLY for Google accounts (password = null)
-  if (this.password === null) return next();
+  if (this.password === null) return;
 
   // Prevent empty string passwords
   if (this.password === "") {
-    return next(new Error("Password cannot be empty"));
+    throw new Error("Password cannot be empty");
   }
 
   // Strong password enforcement
-  if (
-    this.isModified("password") &&
-    this.password &&
-    this.password.length < 6
-  ) {
-    return next(new Error("Password must be at least 6 characters long"));
+  if (this.isModified("password") && this.password && this.password.length < 6) {
+    throw new Error("Password must be at least 6 characters long");
   }
 
   // Hash only when modified
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password")) return;
 
   this.password = await bcrypt.hash(this.password, 12);
-  next();
 });
 
 /* ---------------------------------------------------------

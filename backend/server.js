@@ -1,3 +1,22 @@
+/* =============================================================================
+ * EcoTrack Backend (Express) - Application Bootstrap
+ * =============================================================================
+ * Purpose:
+ *   Start the Express API, apply security/performance middleware, connect to MongoDB,
+ *   mount all route modules, and provide health/error handling.
+ *
+ * Key Responsibilities:
+ *   - Load environment variables (`dotenv`)
+ *   - Connect to MongoDB at startup
+ *   - Apply security headers (Helmet), CORS, rate limiting (production), compression, and logging
+ *   - Mount route groups under `/api/*`
+ *   - Provide `/health` endpoint and a global 404 + error handler
+ *
+ * Side Effects:
+ *   - Establishes a MongoDB connection.
+ *   - Starts an HTTP server on `process.env.PORT` (default: `5000`).
+ * ============================================================================= */
+
 require("dotenv").config();
 const express = require("express");
 const helmet = require("helmet");
@@ -37,10 +56,31 @@ app.use(
 /* -------------------------------------------------------------------------- */
 app.use(
   cors({
-    origin: [
-      process.env.FRONTEND_URL || "http://localhost:3000",
-      "http://127.0.0.1:3000",
-    ],
+    origin: (origin, callback) => {
+      // Allow non-browser tools (curl/postman/server-to-server)
+      if (!origin) return callback(null, true);
+
+      const normalizeOrigin = (value) => value.replace(/\/+$/, "");
+      const normalizedOrigin = normalizeOrigin(origin);
+
+      const allowedOrigins = new Set([
+        normalizeOrigin(process.env.FRONTEND_URL || "http://localhost:3000"),
+        "http://127.0.0.1:3000",
+        "http://localhost:5000",
+        "http://127.0.0.1:5000",
+      ]);
+
+      // Allow localhost/127.0.0.1 on any port for local dev (3000/3001/etc.)
+      const isLocalDevOrigin = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(
+        normalizedOrigin
+      );
+
+      if (allowedOrigins.has(normalizedOrigin) || isLocalDevOrigin) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
     methods: "GET,POST,PUT,PATCH,DELETE",
     allowedHeaders: "Content-Type,Authorization",
@@ -111,7 +151,9 @@ app.get("/health", (req, res) => {
 /* -------------------------------------------------------------------------- */
 /*                                 ❌ 404 HANDLER                               */
 /* -------------------------------------------------------------------------- */
-app.all("*", (req, res) => {
+// Express 5 + path-to-regexp no longer accepts `"*"` as a route pattern.
+// Use a terminal middleware to catch any unmatched request.
+app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: `Route ${req.originalUrl} not found.`,

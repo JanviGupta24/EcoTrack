@@ -1,4 +1,14 @@
-// src/components/AuthLayout.jsx
+/* =============================================================================
+ * AuthLayout Component
+ * =============================================================================
+ * Purpose:
+ *   Provide a consistent layout for authentication-related pages
+ *   (login/register/password reset).
+ *
+ * Key Behavior:
+ *   - Wraps children with a branding/visual shell.
+ *   - Ensures consistent spacing and background styling across auth pages.
+ * ============================================================================= */
 import React from "react";
 import { Leaf } from "lucide-react";
 
