@@ -245,7 +245,7 @@ vercel --prod
 ## 📄 License & Author
 
 - **License:** This project is licensed under the MIT License - see LICENSE file for details.
-- **Author:** Tushar Mittal
+- **Author:** Janvi Gupta
 
 ## 🙏 Acknowledgments
 OpenAI, MongoDB Atlas, Cloudinary, Razorpay, and all open-source contributors.
